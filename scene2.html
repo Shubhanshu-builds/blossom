@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HAPPY BIRTHDAY !!!</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@400;500;600&display=swap');
+
+  :root{
+    --cream:#FFF7E8;
+    --gold-wash:#FFEFC2;
+    --pink-wash:#FFD9EA;
+    --purple-wash:#E7D2FF;
+    --ink:#3E1638;
+    --ink-soft:#7A5470;
+    --rose:#E85A83;
+    --rose-deep:#C93F6E;
+    --line:rgba(62,22,56,0.14);
+    --card:rgba(255,255,255,0.4);
+    --card-border:rgba(255,255,255,0.6);
+  }
+
+  *{ box-sizing:border-box; }
+
+  html,body{
+    margin:0;
+    padding:0;
+    min-height:100vh;
+    scroll-behavior:smooth;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior-y:auto;
+    background:
+      radial-gradient(circle at 14% 18%, var(--gold-wash) 0%, transparent 42%),
+      radial-gradient(circle at 88% 12%, var(--pink-wash) 0%, transparent 48%),
+      radial-gradient(circle at 55% 95%, var(--purple-wash) 0%, transparent 55%),
+      linear-gradient(165deg, #FFF9EE 0%, #FFF1E4 38%, #FDEAF2 72%, #F4E7FB 100%);
+    font-family:'Inter', sans-serif;
+    color:var(--ink);
+    overflow-x:hidden;
+    overflow-y:auto;
+    scrollbar-gutter:stable;
+  }
+
+  .page{
+    position:relative;
+    min-height:100vh;
+    width:100%;
+  }
+
+  /* ---------- decorative blossom line-art (pure CSS/SVG, no image files needed) ---------- */
+  .blossom-decor{
+    position:absolute;
+    z-index:1;
+    pointer-events:none;
+    opacity:0.55;
+  }
+  .blossom-tl{ top:-40px; left:-40px; width:280px; height:280px; transform:rotate(-12deg); }
+  .blossom-br{ bottom:-60px; right:-60px; width:340px; height:340px; transform:rotate(160deg); }
+
+  /* ---------- floating fx canvas (petals + butterflies), sits BEHIND the text ---------- */
+  #fx-canvas{
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    z-index:2;
+    pointer-events:none;
+  }
+
+  /* ---------- section ---------- */
+  .projects{
+    position:relative;
+    z-index:3;
+    max-width:1040px;
+    margin:0 auto;
+    padding: clamp(64px, 10vw, 120px) 28px 140px;
+    touch-action:pan-y;
+    transform:translateZ(0);
+  }
+
+  .projects-head h1{
+    font-family:'Fraunces', serif;
+    font-weight:500;
+    font-style:italic;
+    font-size:clamp(2.6rem, 6vw, 4.4rem);
+    line-height:1.02;
+    margin:0 0 34px;
+    letter-spacing:-0.01em;
+  }
+
+  .filters{
+    position:relative;
+    display:flex;
+    gap:28px;
+    flex-wrap:wrap;
+    padding-bottom:14px;
+    border-bottom:1px solid var(--line);
+    margin-bottom:8px;
+  }
+
+  .filter{
+    background:none;
+    border:none;
+    font-family:'Inter', sans-serif;
+    font-size:0.98rem;
+    font-weight:500;
+    color:var(--ink-soft);
+    cursor:pointer;
+    padding:6px 2px;
+    position:relative;
+    transition:color 0.3s ease;
+  }
+  .filter:hover{ color:var(--ink); }
+  .filter.active{ color:var(--rose-deep); }
+  .filter:focus-visible{ outline:2px solid var(--rose); outline-offset:3px; border-radius:3px; }
+
+  .filter-underline{
+    position:absolute;
+    bottom:-1px;
+    height:2px;
+    background:var(--rose-deep);
+    border-radius:2px;
+    transition: left 0.45s cubic-bezier(.65,0,.35,1), width 0.45s cubic-bezier(.65,0,.35,1);
+  }
+
+  /* ---------- project rows ---------- */
+  .project-list{
+    margin-top:6px;
+    padding-bottom:18vh;
+    perspective:1200px;
+  }
+
+  .project-row{
+    --reveal-delay: 0s;
+    --row-rx: 0deg;
+    --row-ry: 0deg;
+    --row-mx: 50%;
+    --row-my: 50%;
+    position:relative;
+    display:grid;
+    grid-template-columns: 48px 1fr auto 28px;
+    align-items:center;
+    gap:20px;
+    padding:26px 20px;
+    border-bottom:1px solid var(--line);
+    cursor:pointer;
+    background:transparent;
+    border-radius:18px;
+    transform-style:preserve-3d;
+    transform: perspective(900px) rotateX(var(--row-ry)) rotateY(var(--row-rx)) translateZ(0);
+    transition: background 0.35s ease, transform 0.22s cubic-bezier(.22,1,.36,1),
+                box-shadow 0.35s ease, border-color 0.35s ease, opacity 0.32s ease, max-height 0.32s ease;
+    will-change: transform;
+    contain: layout paint;
+    opacity:0;
+    animation: rowIn 0.7s cubic-bezier(.22,1,.36,1) forwards;
+    animation-delay: var(--reveal-delay);
+    overflow:hidden;
+  }
+  @keyframes rowIn{ from{ opacity:0; transform:translateY(18px); } to{ opacity:1; transform:translateY(0); } }
+
+  .project-row::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    border-radius:inherit;
+    background:radial-gradient(circle 280px at var(--row-mx) var(--row-my), rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.1) 45%, transparent 70%);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 0.35s ease;
+    z-index:0;
+  }
+  .project-row:hover::before, .project-row:focus-within::before{
+    opacity:1;
+  }
+
+  .project-row:hover, .project-row:focus-within{
+    background:rgba(255,255,255,0.62);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 16px 36px -10px rgba(62,22,56,0.14), 0 0 0 1px rgba(255,255,255,0.8) inset;
+    border-bottom-color:transparent;
+    transform: perspective(900px) rotateX(var(--row-ry)) rotateY(var(--row-rx)) translateZ(8px) scale(1.012);
+  }
+
+  .project-row.hide{
+    opacity:0 !important;
+    transform: translateY(-14px) !important;
+    max-height:0 !important;
+    padding-top:0 !important;
+    padding-bottom:0 !important;
+    margin:0 !important;
+    border-bottom-color:transparent !important;
+    pointer-events:none;
+  }
+
+  .row-index{
+    position:relative;
+    z-index:1;
+    font-family:'Inter', sans-serif;
+    font-size:0.84rem;
+    font-weight:600;
+    color:var(--ink-soft);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .row-title{
+    position:relative;
+    z-index:1;
+    font-family:'Fraunces', serif;
+    font-weight:500;
+    font-size:clamp(1.4rem, 3vw, 2.15rem);
+    margin:0;
+    letter-spacing:-0.01em;
+    transition: transform 0.4s cubic-bezier(.22,1,.36,1), color 0.3s ease;
+  }
+  .project-row:hover .row-title{ transform: translateX(12px); color:var(--rose-deep); }
+
+  .row-meta{
+    position:relative;
+    z-index:1;
+    display:flex;
+    align-items:center;
+    gap:16px;
+    font-size:0.86rem;
+    color:var(--ink-soft);
+    white-space:nowrap;
+  }
+  .row-cat{
+    padding:5px 14px;
+    border:1px solid rgba(62,22,56,0.18);
+    background:rgba(255,255,255,0.45);
+    border-radius:999px;
+    font-weight:500;
+    transition:background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+  }
+  .project-row:hover .row-cat{
+    background:rgba(255,255,255,0.9);
+    border-color:var(--rose);
+    color:var(--rose-deep);
+  }
+
+  .row-arrow{
+    position:relative;
+    z-index:1;
+    font-size:1.35rem;
+    color:var(--ink-soft);
+    transition: transform 0.4s cubic-bezier(.22,1,.36,1), color 0.3s ease;
+  }
+  .project-row:hover .row-arrow{ transform: translate(5px,-5px) rotate(0deg) scale(1.15); color:var(--rose-deep); }
+
+  .row-thumb{
+    display:none; /* desktop uses floating preview */
+  }
+
+  @media (max-width: 720px){
+    .project-row{ grid-template-columns: 32px 1fr 24px; padding:18px 14px; }
+    .row-meta{ display:none; }
+    .row-thumb{
+      display:flex;
+      grid-column: 1 / -1;
+      margin-top:14px;
+      height:165px;
+      border-radius:14px;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+      box-shadow: 0 8px 22px rgba(62,22,56,0.12);
+    }
+  }
+
+  /* ---------- floating cursor preview (desktop) ---------- */
+  .preview{
+    position:fixed;
+    top:0; left:0;
+    width:300px;
+    height:200px;
+    z-index:15;
+    pointer-events:none;
+    border-radius:20px;
+    overflow:hidden;
+    opacity:0;
+    transform: translate(-50%,-50%) scale(0.85);
+    transition: opacity 0.3s cubic-bezier(.22,1,.36,1);
+    box-shadow: 0 28px 65px -14px rgba(62,22,56,0.38), 0 0 0 1.5px rgba(255,255,255,0.7) inset;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+  .preview.visible{ opacity:1; }
+  .preview-inner{
+    width:100%;
+    height:100%;
+    position:relative;
+    overflow:hidden;
+  }
+
+  /* Bespoke generative romantic memory card styling */
+  .memory-card{
+    width:100%;
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    padding:20px 22px;
+    box-sizing:border-box;
+    position:relative;
+    color:var(--ink);
+  }
+  .memory-card.dark{
+    color:#fff;
+  }
+  .memory-card::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 60%, rgba(0,0,0,0.12) 100%);
+    pointer-events:none;
+  }
+  .mc-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    position:relative;
+    z-index:2;
+  }
+  .mc-tag{
+    font-size:0.72rem;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    font-weight:600;
+    padding:4px 10px;
+    border-radius:999px;
+    background:rgba(255,255,255,0.45);
+    backdrop-filter:blur(6px);
+  }
+  .memory-card.dark .mc-tag{
+    background:rgba(255,255,255,0.2);
+    color:#fff;
+  }
+  .mc-icon{
+    font-size:1.3rem;
+  }
+  .mc-body{
+    position:relative;
+    z-index:2;
+  }
+  .mc-title{
+    font-family:'Fraunces', serif;
+    font-size:1.35rem;
+    font-weight:600;
+    font-style:italic;
+    margin:0 0 6px;
+    line-height:1.1;
+  }
+  .mc-quote{
+    font-size:0.78rem;
+    line-height:1.45;
+    opacity:0.92;
+    margin:0;
+  }
+
+  @media (max-width: 720px){
+    .preview{ display:none; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .project-row, .row-title, .row-arrow, .preview{ transition:none !important; animation:none !important; opacity:1 !important; transform:none !important; }
+  }
+
+  /* ---------- next-page navigation ---------- */
+  .next-page{
+    position:fixed;
+    right:clamp(22px,4vw,56px);
+    bottom:clamp(22px,4vh,42px);
+    z-index:8;
+    border:1px solid rgba(62,22,56,.28);
+    background:rgba(255,255,255,.55);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    color:var(--ink);
+    border-radius:999px;
+    padding:13px 22px;
+    font:600 .82rem/1 Inter,sans-serif;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    cursor:pointer;
+    box-shadow:0 14px 34px rgba(62,22,56,.14), 0 0 0 1px rgba(255,255,255,0.8) inset;
+    transition:transform .35s cubic-bezier(.22,1,.36,1), background .25s ease, box-shadow .25s ease, color .25s ease;
+  }
+  .next-page:hover{
+    transform:translateY(-4px) scale(1.05);
+    background:rgba(255,255,255,.9);
+    color:var(--rose-deep);
+    box-shadow:0 20px 42px rgba(62,22,56,.22), 0 0 25px rgba(232,90,131,0.25);
+  }
+  .next-page:active{transform:translateY(-1px) scale(.98)}
+  @media(max-width:720px){
+    .next-page{right:18px;bottom:18px;padding:12px 18px;font-size:.75rem}
+  }
+
+  /* Curtain transition effect */
+  .page-transition-curtain{
+    position:fixed;
+    inset:0;
+    z-index:999;
+    pointer-events:none;
+    opacity:0;
+    background:
+      radial-gradient(circle at 50% 50%, rgba(255,245,232,0.98) 0%, rgba(255,225,238,0.95) 50%, rgba(232,198,245,0.98) 100%);
+    backdrop-filter:blur(20px);
+    transition:opacity 0.65s cubic-bezier(.22,1,.36,1);
+  }
+  body.next-leaving .page-transition-curtain{
+    opacity:1;
+  }
+  body.next-leaving .projects,
+  body.next-leaving .blossom-decor,
+  body.next-leaving #fx-canvas{
+    opacity:0;
+    transform:translateY(-24px) scale(.97);
+    filter:blur(10px);
+    transition:opacity .55s ease, transform .65s cubic-bezier(.22,1,.36,1), filter .55s ease;
+  }
+  body.next-leaving .next-page{
+    opacity:0;
+    transform:translateY(12px) scale(.94);
+    transition:opacity .25s ease, transform .25s ease;
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <svg class="blossom-decor blossom-tl" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M10 120 C40 100 60 70 55 40" stroke="#C93F6E" stroke-width="2" stroke-linecap="round"/>
+    <g transform="translate(55,40)">
+      <ellipse cx="0" cy="-10" rx="9" ry="14" fill="#FFD9EA"/>
+      <ellipse cx="9" cy="-3" rx="9" ry="14" fill="#FFC7DE" transform="rotate(72 9 -3)"/>
+      <ellipse cx="6" cy="8" rx="9" ry="14" fill="#FFD9EA" transform="rotate(144 6 8)"/>
+      <ellipse cx="-6" cy="8" rx="9" ry="14" fill="#FFC7DE" transform="rotate(216 -6 8)"/>
+      <ellipse cx="-9" cy="-3" rx="9" ry="14" fill="#FFD9EA" transform="rotate(288 -9 -3)"/>
+      <circle cx="0" cy="0" r="4" fill="#E8B86D"/>
+    </g>
+    <g transform="translate(30,85)">
+      <ellipse cx="0" cy="-7" rx="6" ry="10" fill="#E7D2FF"/>
+      <ellipse cx="6" cy="-2" rx="6" ry="10" fill="#F0DFFF" transform="rotate(72 6 -2)"/>
+      <ellipse cx="4" cy="6" rx="6" ry="10" fill="#E7D2FF" transform="rotate(144 4 6)"/>
+      <ellipse cx="-4" cy="6" rx="6" ry="10" fill="#F0DFFF" transform="rotate(216 -4 6)"/>
+      <ellipse cx="-6" cy="-2" rx="6" ry="10" fill="#E7D2FF" transform="rotate(288 -6 -2)"/>
+      <circle cx="0" cy="0" r="2.6" fill="#E8B86D"/>
+    </g>
+  </svg>
+
+  <svg class="blossom-decor blossom-br" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M190 90 C150 100 120 90 105 60" stroke="#C93F6E" stroke-width="2" stroke-linecap="round"/>
+    <g transform="translate(105,60)">
+      <ellipse cx="0" cy="-10" rx="9" ry="14" fill="#FFEFC2"/>
+      <ellipse cx="9" cy="-3" rx="9" ry="14" fill="#FFD9EA" transform="rotate(72 9 -3)"/>
+      <ellipse cx="6" cy="8" rx="9" ry="14" fill="#FFEFC2" transform="rotate(144 6 8)"/>
+      <ellipse cx="-6" cy="8" rx="9" ry="14" fill="#FFD9EA" transform="rotate(216 -6 8)"/>
+      <ellipse cx="-9" cy="-3" rx="9" ry="14" fill="#FFEFC2" transform="rotate(288 -9 -3)"/>
+      <circle cx="0" cy="0" r="4" fill="#E8B86D"/>
+    </g>
+    <g transform="translate(150,45)">
+      <ellipse cx="0" cy="-7" rx="6" ry="10" fill="#E7D2FF"/>
+      <ellipse cx="6" cy="-2" rx="6" ry="10" fill="#FFD9EA" transform="rotate(72 6 -2)"/>
+      <ellipse cx="4" cy="6" rx="6" ry="10" fill="#E7D2FF" transform="rotate(144 4 6)"/>
+      <ellipse cx="-4" cy="6" rx="6" ry="10" fill="#FFD9EA" transform="rotate(216 -4 6)"/>
+      <ellipse cx="-6" cy="-2" rx="6" ry="10" fill="#E7D2FF" transform="rotate(288 -6 -2)"/>
+      <circle cx="0" cy="0" r="2.6" fill="#E8B86D"/>
+    </g>
+  </svg>
+
+  <canvas id="fx-canvas"></canvas>
+
+  <section class="projects">
+    <header class="projects-head">
+      <h1>SOME PICTURE OF YOUR'S 👀💌</h1>
+      <div class="filters" id="filters">
+        <button class="filter active" data-filter="melodies">MEMORIESS👀💗</button>
+        <span class="filter-underline"></span>
+      </div>
+    </header>
+
+    <div class="project-list" id="projectList">
+      <!--
+        Each row below has a data-img attribute — that's the easiest hook for adding
+        a real picture later. Put an image path in there (e.g. data-img="images/aurora.jpg")
+        and the script will use it for both the inline thumbnail and the floating
+        cursor preview automatically. Leave it blank to keep the placeholder pattern.
+      -->
+      <article class="project-row" data-category="MEMORIESS👀💗" data-img="assets/images/memory-01-smoothest.jpg" tabindex="0">
+        <span class="row-index">01</span>
+        <h2 class="row-title">SMOOTHEST </h2>
+        <span class="row-meta"><span class="row-cat">Aurora Rebrand</span><span class="row-year">2026</span></span>
+               <div class="row-thumb"><span>+ Add image</span></div>
+      </article>
+
+      <article class="project-row" data-category="MEMORIESS👀💗" data-img="assets/images/memory-02-cutest.jpg" tabindex="0">
+        <span class="row-index">02</span>
+        <h2 class="row-title">CUTEST</h2>
+        <span class="row-meta"><span class="row-cat">Nurturing</span><span class="row-year">2026</span></span>
+                <div class="row-thumb"><span>+ Add image</span></div>
+      </article>
+
+      <article class="project-row" data-category="MEMORIESS👀💗" data-img="assets/images/memory-03-blossom.jpg" tabindex="0">
+        <span class="row-index">03</span>
+        <h2 class="row-title">BLOSSOM</h2>
+        <span class="row-meta"><span class="row-cat">Metaphor</span><span class="row-year">2025</span></span>
+               <div class="row-thumb"><span>+ Add image</span></div>
+      </article>
+
+      <article class="project-row" data-category="MEMORIESS👀💗" data-img="assets/images/memory-04-funniest-yet-cutest.jpg" tabindex="0">
+        <span class="row-index">04</span>
+        <h2 class="row-title">FUNNIEST YET CUTEST</h2>
+        <span class="row-meta"><span class="row-cat">Sunflower</span><span class="row-year">2025</span></span>
+               <div class="row-thumb"><span>+ Add image</span></div>
+      </article>
+
+      <article class="project-row" data-category="MEMORIESS👀💗" data-img="assets/images/memory-05-immersive.jpg" tabindex="0">
+        <span class="row-index">05</span>
+        <h2 class="row-title">IMMERSIVE</h2>
+        <span class="row-meta"><span class="row-cat">Sakura</span><span class="row-year">2025</span></span>
+               <div class="row-thumb"><span>+ Add image</span></div>
+      </article>
+
+      <article class="project-row" data-category="MEMORIESS👀💗" data-img="assets/images/memory-06-bold.jpg" tabindex="0">
+        <span class="row-index">06</span>
+        <h2 class="row-title">BOLD</h2>
+        <span class="row-meta"><span class="row-cat">Expressive</span><span class="row-year">2024</span></span>
+               <div class="row-thumb"><span>+ Add image</span></div>
+      </article>
+    </div>
+  </section>
+
+  <div class="page-transition-curtain"></div>
+  <div class="preview" id="preview"><div class="preview-inner" id="previewImg"></div></div>
+</div>
+
+<button class="next-page" id="nextPage" type="button" aria-label="Go to closer page">Closer →</button>
+
+<script>
+(function(){
+  "use strict";
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var nextPage = document.getElementById("nextPage");
+  if(nextPage){
+    nextPage.addEventListener("click", function(){
+      document.body.classList.add("next-leaving");
+      setTimeout(function(){ window.location.href = "scene3.html"; }, 600);
+    });
+  }
+
+  // Audio bridge: notify parent if in iframe, or play standalone
+  function notifyMusicGesture(){
+    if(window.parent && window.parent !== window){
+      window.parent.postMessage("startMusic", "*");
+    } else {
+      var audio = document.getElementById("siteMusic");
+      if(!audio){
+        audio = document.createElement("audio");
+        audio.id = "siteMusic";
+        audio.src = "assets/music.mp3";
+        audio.loop = true;
+        audio.preload = "auto";
+        document.body.appendChild(audio);
+      }
+      if(localStorage.getItem("birthdayMusicOn") !== "0" && audio.paused){
+        audio.play().catch(function(){});
+      }
+    }
+  }
+  window.addEventListener("pointerdown", notifyMusicGesture, { passive: true });
+
+  /* ---------------- filter tabs with sliding underline ---------------- */
+  var filterBar = document.getElementById('filters');
+  var buttons = Array.prototype.slice.call(filterBar.querySelectorAll('.filter'));
+  var underline = filterBar.querySelector('.filter-underline');
+  var rows = Array.prototype.slice.call(document.querySelectorAll('.project-row'));
+
+  rows.forEach(function(row, i){ row.style.setProperty('--reveal-delay', (i * 0.06) + 's'); });
+
+  function moveUnderline(el){
+    underline.style.left = el.offsetLeft + 'px';
+    underline.style.width = el.offsetWidth + 'px';
+  }
+  moveUnderline(buttons[0]);
+  window.addEventListener('resize', function(){
+    var active = filterBar.querySelector('.filter.active');
+    if(active) moveUnderline(active);
+  });
+
+  function applyFilter(filter){
+    var visibleIndex = 0;
+    rows.forEach(function(row){
+      var match = filter === 'all' || row.getAttribute('data-category') === filter;
+      if(match){
+        row.classList.remove('hide');
+        row.style.transitionDelay = (visibleIndex * 0.05) + 's';
+        visibleIndex++;
+      } else {
+        row.style.transitionDelay = '0s';
+        row.classList.add('hide');
+      }
+    });
+  }
+
+  buttons.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      buttons.forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      moveUnderline(btn);
+      applyFilter(btn.getAttribute('data-filter'));
+    });
+  });
+
+  /* ---------------- Bespoke Memory Cards ---------------- */
+  var CARD_PREVIEWS = {
+    "01": { title:"Aurora Rebrand", theme:"Dawn & Morning Light", quote:"The gentle light that found me in the quiet morning.", grad:"linear-gradient(135deg, #FFF0F5 0%, #FFE0B2 50%, #FFB6C1 100%)", icon:"✨", dark:false, tag:" 01" },
+    "02": { title:"Nocturne App", theme:"Midnight Conversations", quote:"When 2 AM felt like a secret universe made just for us.", grad:"linear-gradient(135deg, #1F0D3D 0%, #4B1A6D 55%, #C25993 100%)", icon:"🌙", dark:true, tag:" 02" },
+    "03": { title:"Wildflower Film", theme:"Meadows & Laughter", quote:"Every candid moment of your smile that stays in bloom.", grad:"linear-gradient(135deg, #FFF8E7 0%, #FDD387 50%, #F492AC 100%)", icon:"🌸", dark:false, tag:" 03" },
+    "04": { title:"Terra Studio", theme:"Sanctuary of Warmth", quote:"Your presence is my safe harbor and sweetest place to rest.", grad:"linear-gradient(135deg, #FFF3E6 0%, #F5BFA8 50%, #C9728E 100%)", icon:"🌿", dark:false, tag:" 04" },
+    "05": { title:"Halcyon Interactive", theme:"Endless Serenity", quote:"The effortless peace you bring into every room you enter.", grad:"linear-gradient(135deg, #E8F4FD 0%, #CFB5FF 50%, #F8BFD8 100%)", icon:"🕊️", dark:false, tag:" 05" },
+    "06": { title:"Petrichor Motion", theme:"Scent of Gentle Rain", quote:"New beginnings, shared umbrella walks, and quiet wishes.", grad:"linear-gradient(135deg, #E8F5E9 0%, #A5D6A7 50%, #90A4AE 100%)", icon:"💧", dark:false, tag:" 06" }
+  };
+
+  function renderCardHTML(data){
+    return '<div class="memory-card ' + (data.dark ? 'dark' : '') + '" style="background:' + data.grad + ';">' +
+      '<div class="mc-top">' +
+        '<span class="mc-tag">' + data.tag + '</span>' +
+        '<span class="mc-icon">' + data.icon + '</span>' +
+      '</div>' +
+      '<div class="mc-body">' +
+        '<h3 class="mc-title">' + data.title + '</h3>' +
+        '<p class="mc-quote">' + data.quote + '</p>' +
+      '</div>' +
+    '</div>';
+  }
+
+  // Populate inline thumbnails for mobile view
+  rows.forEach(function(row){
+    var idx = row.querySelector('.row-index').textContent.trim();
+    var thumb = row.querySelector('.row-thumb');
+    var img = row.getAttribute('data-img');
+    if(thumb){
+      if(img){
+        thumb.innerHTML = '<img src="' + img + '" alt="' + idx + '" style="width:100%;height:100%;object-fit:cover;">';
+      } else if(CARD_PREVIEWS[idx]){
+        thumb.innerHTML = renderCardHTML(CARD_PREVIEWS[idx]);
+      }
+    }
+  });
+
+  /* ---------------- 3D Magnetic Row Tilt ---------------- */
+  rows.forEach(function(row){
+    row.addEventListener('mousemove', function(e){
+      if(reduceMotion) return;
+      var rect = row.getBoundingClientRect();
+      var rx = (e.clientX - rect.left) / rect.width - 0.5;
+      var ry = (e.clientY - rect.top) / rect.height - 0.5;
+      row.style.setProperty('--row-rx', (rx * 14).toFixed(2) + 'deg');
+      row.style.setProperty('--row-ry', (-ry * 10).toFixed(2) + 'deg');
+      row.style.setProperty('--row-mx', (e.clientX - rect.left) + 'px');
+      row.style.setProperty('--row-my', (e.clientY - rect.top) + 'px');
+    });
+    row.addEventListener('mouseleave', function(){
+      row.style.setProperty('--row-rx', '0deg');
+      row.style.setProperty('--row-ry', '0deg');
+    });
+  });
+
+  /* ---------------- floating cursor preview with spring physics ---------------- */
+  var preview = document.getElementById('preview');
+  var previewImg = document.getElementById('previewImg');
+  var pos = { x:0, y:0 };
+  var target = { x:0, y:0 };
+  var vel = { x:0, y:0 };
+  var activeRow = null;
+  var isDesktop = window.matchMedia('(min-width: 721px)').matches;
+
+  document.addEventListener('mousemove', function(e){
+    target.x = e.clientX;
+    target.y = e.clientY;
+  });
+
+  rows.forEach(function(row){
+    row.addEventListener('mouseenter', function(){
+      if(!isDesktop) return;
+      activeRow = row;
+      var img = row.getAttribute('data-img');
+      var idx = row.querySelector('.row-index').textContent.trim();
+      if(img){
+        previewImg.style.backgroundImage = 'url(' + img + ')';
+        previewImg.style.backgroundSize = 'cover';
+        previewImg.style.backgroundPosition = 'center';
+        previewImg.innerHTML = '';
+      } else if(CARD_PREVIEWS[idx]){
+        previewImg.style.backgroundImage = 'none';
+        previewImg.innerHTML = renderCardHTML(CARD_PREVIEWS[idx]);
+      } else {
+        previewImg.style.backgroundImage = 'none';
+        previewImg.innerHTML = '<span>' + row.querySelector('.row-title').textContent + '</span>';
+      }
+      preview.classList.add('visible');
+    });
+    row.addEventListener('mouseleave', function(){
+      if(activeRow === row){
+        activeRow = null;
+        preview.classList.remove('visible');
+      }
+    });
+  });
+
+  function previewLoop(){
+    var dx = target.x - pos.x;
+    var dy = target.y - pos.y;
+    var damp = reduceMotion ? 1 : 0.16;
+    vel.x = dx * damp;
+    vel.y = dy * damp;
+    pos.x += vel.x;
+    pos.y += vel.y;
+    var tiltX = Math.max(-14, Math.min(14, vel.x * 0.65));
+    var tiltY = Math.max(-10, Math.min(10, -vel.y * 0.45));
+    preview.style.transform = 'translate(' + pos.x + 'px,' + pos.y + 'px) translate(-50%,-60%) rotate(' + tiltX + 'deg) rotateX(' + tiltY + 'deg) scale(' + (activeRow ? 1 : 0.82) + ')';
+    requestAnimationFrame(previewLoop);
+  }
+  requestAnimationFrame(previewLoop);
+
+  /* ---------------- canvas: falling petals + wandering butterflies ---------------- */
+  var canvas = document.getElementById('fx-canvas');
+  var ctx = canvas.getContext('2d');
+  var W, H;
+  function resize(){
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  var mouse = { x:-9999, y:-9999, vx:0, vy:0 };
+  var lastMouseX = -9999, lastMouseY = -9999;
+  var lastMouseMove = performance.now();
+  var cursorMoving = false;
+  var CURSOR_IDLE_MS = 200;
+  window.addEventListener('mousemove', function(e){
+    if(Math.abs(e.clientX-lastMouseX) + Math.abs(e.clientY-lastMouseY) > 0.5){
+      cursorMoving = true;
+      lastMouseMove = performance.now();
+    }
+    mouse.vx = e.clientX - lastMouseX;
+    mouse.vy = e.clientY - lastMouseY;
+    lastMouseX = mouse.x = e.clientX;
+    lastMouseY = mouse.y = e.clientY;
+  });
+  window.addEventListener('mouseleave', function(){ mouse.x = -9999; mouse.y = -9999; cursorMoving = false; });
+
+  var sparkDust = [];
+  function addSpark(x, y, color){
+    if(sparkDust.length > 90 || reduceMotion) return;
+    sparkDust.push({
+      x: x, y: y,
+      vx: (Math.random()-0.5)*1.2,
+      vy: (Math.random()-0.5)*1.2 - 0.3,
+      size: 1.5 + Math.random()*2.2,
+      alpha: 0.9,
+      decay: 0.02 + Math.random()*0.03,
+      color: color || '#FFD68A'
+    });
+  }
+
+  var petalColors = ['#FFC7DE', '#FFD9EA', '#F0DFFF', '#FFEFC2'];
+  var PETAL_COUNT = reduceMotion ? 0 : 32;
+  var petals = [];
+  function makePetal(spawnAnywhere){
+    return {
+      x: Math.random() * W,
+      y: spawnAnywhere ? Math.random() * H : -20 - Math.random() * 200,
+      vy: 0.4 + Math.random() * 0.6,
+      vx: -0.2 + Math.random() * 0.4,
+      size: 6 + Math.random() * 8,
+      rot: Math.random() * Math.PI * 2,
+      rotSpeed: (-0.02 + Math.random() * 0.04),
+      swayFreq: 0.6 + Math.random() * 0.8,
+      swayAmp: 18 + Math.random() * 24,
+      swayPhase: Math.random() * Math.PI * 2,
+      color: petalColors[Math.floor(Math.random() * petalColors.length)],
+      opacity: 0.55 + Math.random() * 0.35
+    };
+  }
+  for(var p = 0; p < PETAL_COUNT; p++) petals.push(makePetal(true));
+
+  function drawPetal(pt, t){
+    var swayX = Math.sin(t * pt.swayFreq + pt.swayPhase) * pt.swayAmp * 0.02;
+
+    // Aerodynamic interaction with cursor
+    if(mouse.x > 0 && !reduceMotion){
+      var pdx = pt.x - mouse.x;
+      var pdy = pt.y - mouse.y;
+      var pdist = Math.hypot(pdx, pdy);
+      var mSpeed = Math.hypot(mouse.vx, mouse.vy);
+      if(pdist < 160 && mSpeed > 2){
+        var push = (1 - pdist / 160) * 2.8;
+        pt.vx += (pdx / (pdist || 1)) * push * 0.35 + mouse.vx * 0.04;
+        pt.vy += (pdy / (pdist || 1)) * push * 0.35 + mouse.vy * 0.04;
+        pt.rotSpeed += (Math.random() - 0.5) * 0.06;
+      }
+    }
+
+    pt.vx *= 0.98;
+    pt.vy = pt.vy * 0.98 + 0.01;
+
+    ctx.save();
+    ctx.translate(pt.x, pt.y);
+    ctx.rotate(pt.rot);
+    ctx.globalAlpha = pt.opacity;
+    ctx.fillStyle = pt.color;
+    ctx.beginPath();
+    ctx.moveTo(0, -pt.size);
+    ctx.quadraticCurveTo(pt.size, 0, 0, pt.size);
+    ctx.quadraticCurveTo(-pt.size, 0, 0, -pt.size);
+    ctx.fill();
+    ctx.restore();
+
+    pt.x += pt.vx + swayX;
+    pt.y += pt.vy;
+    pt.rot += pt.rotSpeed;
+    if(pt.y > H + 25 || pt.x < -35 || pt.x > W + 35){
+      Object.assign(pt, makePetal(false));
+    }
+  }
+
+  var BUTTERFLY_COUNT = reduceMotion ? 0 : 9;
+  var butterflyColors = [
+    { wing:'#D9B3EE', body:'#7A5470', spark:'#F0DFFF' },
+    { wing:'#F3C56B', body:'#7A5470', spark:'#FFEFC2' },
+    { wing:'#F5A8C0', body:'#7A5470', spark:'#FFD9EA' },
+    { wing:'#C9A6E0', body:'#7A5470', spark:'#D9B3EE' }
+  ];
+  var butterflies = [];
+  for(var b = 0; b < BUTTERFLY_COUNT; b++){
+    butterflies.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      tx: Math.random() * W,
+      ty: Math.random() * H,
+      speed: 0.5 + Math.random() * 0.4,
+      followStrength: 0.012 + (b % 4) * 0.0016,
+      cursorOrbit: Math.random() * Math.PI * 2,
+      cursorRadius: 26 + Math.random() * 80,
+      wingPhase: Math.random() * Math.PI * 2,
+      flapSpeed: 0.20,
+      size: 11 + Math.random() * 5,
+      colors: butterflyColors[b % butterflyColors.length],
+      angle: 0,
+      wanderTimer: 0
+    });
+  }
+
+  function updateButterfly(fl, dt){
+    fl.wanderTimer -= dt;
+    if(fl.wanderTimer <= 0){
+      fl.tx = 60 + Math.random() * (W - 120);
+      fl.ty = 60 + Math.random() * (H - 120);
+      fl.wanderTimer = 2200 + Math.random() * 3200;
+    }
+
+    var now = performance.now();
+    var cursorMovingNow = cursorMoving && (now - lastMouseMove) < CURSOR_IDLE_MS;
+    var baseX = fl.tx, baseY = fl.ty;
+    if(cursorMovingNow){
+      fl.cursorOrbit += 0.00065 * dt;
+      var wobbleX = Math.cos(fl.cursorOrbit) * fl.cursorRadius;
+      var wobbleY = Math.sin(fl.cursorOrbit * 1.17) * fl.cursorRadius * 0.55;
+      baseX = mouse.x + wobbleX;
+      baseY = mouse.y + wobbleY;
+    }
+
+    var dx = baseX - fl.x;
+    var dy = baseY - fl.y;
+    var moveX = dx * (cursorMovingNow ? fl.followStrength : 0.0026);
+    var moveY = dy * (cursorMovingNow ? fl.followStrength : 0.0026);
+    moveX += (fl.tx - fl.x) * 0.0022;
+    moveY += (fl.ty - fl.y) * 0.0022;
+
+    var speedLimit = fl.speed * (cursorMovingNow ? 1.05 : 0.95);
+    var len = Math.sqrt(moveX*moveX + moveY*moveY) || 1;
+    if(len > speedLimit){
+      moveX = (moveX / len) * speedLimit;
+      moveY = (moveY / len) * speedLimit;
+    }
+
+    var mdx = fl.x - mouse.x;
+    var mdy = fl.y - mouse.y;
+    var mdist = Math.sqrt(mdx*mdx + mdy*mdy);
+    var flapBoost = mdist < 180 ? 1.2 : 1;
+
+    fl.x += moveX;
+    fl.y += moveY + Math.sin(fl.wingPhase * 0.3) * 0.25;
+    fl.angle = Math.atan2(moveY, moveX);
+    fl.wingPhase += fl.flapSpeed * flapBoost;
+
+    // Wingtip stardust sparkle
+    if(Math.random() < 0.06 && !reduceMotion){
+      addSpark(fl.x, fl.y, fl.colors.spark);
+    }
+
+    fl.x = Math.max(20, Math.min(W - 20, fl.x));
+    fl.y = Math.max(20, Math.min(H - 20, fl.y));
+  }
+
+  function drawButterfly(fl){
+    var flap = Math.abs(Math.sin(fl.wingPhase));
+    ctx.save();
+    ctx.translate(fl.x, fl.y);
+    ctx.rotate(fl.angle);
+    ctx.globalAlpha = 0.88;
+
+    ctx.fillStyle = fl.colors.wing;
+    ctx.save();
+    ctx.scale(1, 0.35 + flap * 0.65);
+    ctx.beginPath();
+    ctx.ellipse(-fl.size*0.15, -fl.size*0.55, fl.size*0.75, fl.size*0.55, 0, 0, Math.PI*2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(-fl.size*0.15, fl.size*0.55, fl.size*0.75, fl.size*0.55, 0, 0, Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+
+    ctx.fillStyle = fl.colors.body;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, fl.size*0.12, fl.size*0.7, 0, 0, Math.PI*2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  function drawSparkDust(){
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    for(var i = sparkDust.length - 1; i >= 0; i--){
+      var s = sparkDust[i];
+      s.x += s.vx;
+      s.y += s.vy;
+      s.alpha -= s.decay;
+      if(s.alpha <= 0){ sparkDust.splice(i, 1); continue; }
+      ctx.globalAlpha = s.alpha;
+      ctx.fillStyle = s.color;
+      ctx.shadowBlur = 6;
+      ctx.shadowColor = s.color;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  var lastT = performance.now();
+  function loop(now){
+    var dt = now - lastT;
+    lastT = now;
+    ctx.clearRect(0, 0, W, H);
+
+    drawSparkDust();
+    petals.forEach(function(pt){ drawPetal(pt, now * 0.001); });
+    butterflies.forEach(function(fl){ updateButterfly(fl, dt); drawButterfly(fl); });
+
+    requestAnimationFrame(loop);
+  }
+  if(!reduceMotion) requestAnimationFrame(loop);
+  else {
+    petals.forEach(function(pt){ drawPetal(pt, 0); });
+    butterflies.forEach(drawButterfly);
+  }
+})();
+</script>
+
+</body>
+</html>

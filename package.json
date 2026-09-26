@@ -1,0 +1,12 @@
+{
+  "name": "happy-birthday-site",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Birthday microsite with a Telegram-connected reply form, deployed on Vercel.",
+  "scripts": {
+    "dev": "vercel dev"
+  },
+  "dependencies": {
+    "mongodb": "^6.9.0"
+  }
+}
